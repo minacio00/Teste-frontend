@@ -15,6 +15,12 @@
     --background-end-rgb: 0, 0, 0;
   }
 }
+body, html {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  min-height: 100vh;
+}
 
 body {
   color: rgb(var(--foreground-rgb));
