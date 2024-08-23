@@ -1,9 +1,10 @@
 "use client";
 import { useState } from 'react';
+import { requestPasswordReset } from '@/services/requestPasswordReset';
 
 interface PasswordRecoveryModalProps {
   onClose: () => void;
-  onSubmit: (email: string) => void;
+  onSubmit: (email: string, token: string) => void;
 }
 
 const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ onClose, onSubmit }) => {
@@ -15,14 +16,18 @@ const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({ onClose, 
     return emailPattern.test(email);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateEmail(email)) {
       setEmailError('E-mail inválido. Este endereço de e-mail não está cadastrado no sistema, verifique e tente novamente.');
     } else {
-      setEmailError('');
-      onSubmit(email);
+      try {
+      const { token } = await requestPasswordReset(email);
+      onSubmit(email, token);
+    } catch (error: any) {
+      alert(error.message || 'não foi possível completar o pedido para resetar a senha.');
+    }
     }
   };
 

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { validatePassword } from '@/utils/validators';
+import { resetPassword } from '@/services/resetPassword';
 
 
 const PasswordReset = () => {
@@ -13,7 +14,7 @@ const PasswordReset = () => {
 
   
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     const passwordValidationError = validatePassword(password);
@@ -32,8 +33,21 @@ const PasswordReset = () => {
     }
 
     if (!passwordValidationError && passwordsMatch) {
-      alert('Senha alterada com sucesso!');
-      router.push('/login');
+      try {
+        const token = localStorage.getItem('resetToken');
+        if (!token) {
+          alert('Token de redefinição não encontrado.');
+          return;
+        }
+
+        await resetPassword(token, password);
+
+        alert('Senha alterada com sucesso!');
+        localStorage.removeItem('resetToken');
+        router.push('/login');
+      } catch (error: any) {
+        alert(error.message || 'Falha ao redefinir a senha. Por favor, tente novamente.');
+      }
     }
   };
 

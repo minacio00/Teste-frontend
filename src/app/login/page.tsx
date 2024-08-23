@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import PasswordRecoveryModal from '@/components/PasswordRecoveryModal';
 import { useRouter } from 'next/navigation';
-
+import { loginUser } from '@/services/loginService';
 
 const Login = () => {
   const router = useRouter();
@@ -12,15 +12,32 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [generalError, setGeneralError] = useState('');
 
-  const handlePasswordRecoverySubmit = (email: string) => {
+  const handlePasswordRecoverySubmit = (email: string, token: string) => {
     alert(`Um link de recuperação foi enviado para ${email}.`);
+    localStorage.setItem('resetToken', token);
+
     setIsModalOpen(false);
     router.push('/reset-password');
   };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setGeneralError('');
+    setEmailError('');
+    setPasswordError('');
+
+    try {
+      const response = await loginUser(email, password);
+      localStorage.setItem('accessToken', response.accessToken);
+      alert("Usuário logado com sucesso");
+    } catch (error: any) {
+      if (error.message === 'Invalid credentials') {
+        setGeneralError('Credenciais inválidas. Por favor, tente novamente.');
+      } else {
+        setGeneralError('Ocorreu um erro. Por favor, tente novamente.');
+      }
+    }
   };
 
   return (
@@ -68,6 +85,7 @@ const Login = () => {
                 />
                 {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
               </div>
+              {generalError && <p className="text-red-500 text-sm mb-4">{generalError}</p>}
               <div className="mb-6 text-right">
                 <a
                   href="#"
