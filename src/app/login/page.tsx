@@ -31,6 +31,7 @@ const Login = () => {
       const response = await loginUser(email, password);
       localStorage.setItem('accessToken', response.accessToken);
       alert("Usuário logado com sucesso");
+      router.push('/admin-dashboard');
     } catch (error: any) {
       if (error.message === 'Invalid credentials') {
         setGeneralError('Credenciais inválidas. Por favor, tente novamente.');
